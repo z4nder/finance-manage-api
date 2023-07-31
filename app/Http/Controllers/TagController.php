@@ -2,47 +2,45 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\Tag\TagStore;
+use App\Http\Requests\Tag\TagUpdate;
+use App\Http\Resources\TagResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 
 class TagController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): AnonymousResourceCollection
     {
-        //
+        return TagResource::collection(auth()->user()->tags()->paginate(5));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(TagStore $request): Response
     {
-        //
+        $inputs = $request->validated();
+        auth()->user()->tags()->create($inputs);
+
+        return response()->noContent();
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(string $id): TagResource
     {
-        //
+        return new TagResource(auth()->user()->tags()->findOrFail($id));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(TagUpdate $request, string $id): Response
     {
-        //
+        $inputs = $request->validated();
+
+        auth()->user()->tags()->findOrFail($id)->update($inputs);
+
+        return response()->noContent();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(string $id): Response
     {
-        //
+        auth()->user()->tags()->findOrFail($id)->delete();
+
+        return response()->noContent();
     }
 }
